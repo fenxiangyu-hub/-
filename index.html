@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级趣味数学大冒险</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+            touch-action: manipulation;
+        }
+
+        .bounce-anim {
+            animation: bounce 0.5s cubic-bezier(0.36, 0, 0.66, -0.56) alternate infinite;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-12px); }
+        }
+
+        .pop-in {
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .custom-shadow {
+            box-shadow: 0 10px 0 0 rgba(0,0,0,0.15);
+        }
+
+        .btn-press {
+            transition: all 0.1s ease;
+        }
+        .btn-press:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 0 rgba(0,0,0,0.15) !important;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 min-h-screen text-slate-800 flex flex-col justify-between selection:bg-amber-200">
+
+    <!-- 顶部导航与状态栏 -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b-4 border-amber-200 px-4 py-3 shadow-sm">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <button id="homeBtn" onclick="showMenu()" class="text-2xl hover:scale-110 transition-transform">
+                    🏠
+                </button>
+                <h1 class="text-xl md:text-2xl font-bold text-amber-600 tracking-wide">一年级数学大冒险</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- 星星计数 -->
+                <div class="flex items-center bg-amber-100 px-3 py-1 rounded-full border-2 border-amber-300">
+                    <span class="text-xl mr-1">⭐</span>
+                    <span id="starCount" class="font-bold text-lg text-amber-700">0</span>
+                </div>
+                <!-- 音效开关 -->
+                <button id="soundBtn" onclick="toggleSound()" class="bg-slate-100 p-2 rounded-full border-2 border-slate-300 text-slate-600 hover:bg-slate-200">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主体容器 -->
+    <main class="max-w-xl mx-auto w-full px-4 py-6 flex-grow flex flex-col justify-center">
+
+        <!-- 关卡/模式选择界面 -->
+        <div id="menuView" class="space-y-6 pop-in">
+            <div class="text-center space-y-2">
+                <span class="text-6xl inline-block bounce-anim">🎒</span>
+                <h2 class="text-2xl font-bold text-slate-700">选择你想练习的模式</h2>
+                <p class="text-slate-500 text-sm">专为一年级小朋友设计 · 认识数字与基础运算</p>
+            </div>
+
+            <div class="grid gap-4">
+                <!-- 模式1: 10以内加法 -->
+                <button onclick="startGame('add10')" class="btn-press bg-emerald-400 hover:bg-emerald-500 border-b-8 border-emerald-600 text-white rounded-2xl p-5 flex items-center justify-between text-left custom-shadow">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-4xl bg-emerald-300 p-3 rounded-xl">➕</span>
+                        <div>
+                            <div class="text-xl font-bold">10 以内加法</div>
+                            <div class="text-emerald-100 text-sm">初学首选：例 3 + 4 = ?</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-2xl opacity-70"></i>
+                </button>
+
+                <!-- 模式2: 10以内减法 -->
+                <button onclick="startGame('sub10')" class="btn-press bg-sky-400 hover:bg-sky-500 border-b-8 border-sky-600 text-white rounded-2xl p-5 flex items-center justify-between text-left custom-shadow">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-4xl bg-sky-300 p-3 rounded-xl">➖</span>
+                        <div>
+                            <div class="text-xl font-bold">10 以内减法</div>
+                            <div class="text-sky-100 text-sm">基础减法：例 8 - 5 = ?</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-2xl opacity-70"></i>
+                </button>
+
+                <!-- 模式3: 20以内不进退位加减法 -->
+                <button onclick="startGame('mix20')" class="btn-press bg-purple-400 hover:bg-purple-500 border-b-8 border-purple-600 text-white rounded-2xl p-5 flex items-center justify-between text-left custom-shadow">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-4xl bg-purple-300 p-3 rounded-xl">🧮</span>
+                        <div>
+                            <div class="text-xl font-bold">20 以内加减综合</div>
+                            <div class="text-purple-100 text-sm">进阶挑战：例 12 + 5 或 17 - 4</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-2xl opacity-70"></i>
+                </button>
+
+                <!-- 模式4: 凑十法/填空挑战 -->
+                <button onclick="startGame('fillIn')" class="btn-press bg-orange-400 hover:bg-orange-500 border-b-8 border-orange-600 text-white rounded-2xl p-5 flex items-center justify-between text-left custom-shadow">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-4xl bg-orange-300 p-3 rounded-xl">❓</span>
+                        <div>
+                            <div class="text-xl font-bold">神秘填空挑战</div>
+                            <div class="text-orange-100 text-sm">思维训练：例 5 + ( ) = 9</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-2xl opacity-70"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 游戏答题界面 -->
+        <div id="gameView" class="hidden space-y-6">
+            
+            <!-- 进度与计时 -->
+            <div class="bg-white p-4 rounded-2xl shadow-md border-2 border-amber-200 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-bold text-slate-500">进度:</span>
+                    <span id="currentQNum" class="text-xl font-bold text-amber-600">1</span>
+                    <span class="text-slate-400">/ 10</span>
+                </div>
+                <div class="flex-1 mx-4 bg-slate-100 h-4 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progressBar" class="bg-amber-400 h-full w-0 transition-all duration-300 rounded-full"></div>
+                </div>
+                <div class="text-sm font-bold text-slate-500">
+                    ❤️ <span id="livesCount" class="text-rose-500">3</span>
+                </div>
+            </div>
+
+            <!-- 算式板 -->
+            <div id="questionCard" class="bg-white rounded-3xl p-8 text-center border-4 border-amber-300 shadow-xl relative overflow-hidden">
+                <!-- 辅助计数图示 -->
+                <div id="visualAid" class="flex flex-wrap justify-center gap-2 mb-6 min-h-[48px] bg-amber-50/50 p-3 rounded-2xl border border-dashed border-amber-200">
+                    <!-- JS 动态渲染水果/图案辅助计数量 -->
+                </div>
+
+                <!-- 算式文本 -->
+                <div id="questionText" class="text-5xl md:text-6xl font-extrabold text-slate-800 tracking-wider my-2">
+                    <!-- 3 + 5 = ? -->
+                </div>
+            </div>
+
+            <!-- 4个备选答案按钮 -->
+            <div id="optionsGrid" class="grid grid-cols-2 gap-4">
+                <!-- 动态生成选项按钮 -->
+            </div>
+
+            <!-- 鼓励提示 -->
+            <div id="hintBox" class="text-center h-8 text-slate-500 font-bold text-lg">
+                点击正确的答案数字哦！
+            </div>
+        </div>
+
+        <!-- 结算界面 -->
+        <div id="resultView" class="hidden text-center space-y-6 pop-in">
+            <div class="bg-white rounded-3xl p-8 border-4 border-amber-300 shadow-xl space-y-4">
+                <div id="resultEmoji" class="text-7xl">🎉</div>
+                <h2 id="resultTitle" class="text-3xl font-bold text-amber-600">太棒啦！全对通关！</h2>
+                <p id="resultDesc" class="text-slate-600">你展现了超强的心算能力！</p>
+                
+                <div class="py-4 border-y border-slate-100 flex justify-around">
+                    <div>
+                        <div class="text-slate-400 text-sm">获得星星</div>
+                        <div id="earnedStars" class="text-3xl font-bold text-amber-500">⭐ +10</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-400 text-sm">本次正确率</div>
+                        <div id="accuracyText" class="text-3xl font-bold text-emerald-500">100%</div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button onclick="showMenu()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl btn-press">
+                        返回菜单
+                    </button>
+                    <button onclick="restartGame()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl border-b-4 border-amber-700 btn-press">
+                        再玩一次
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 页脚提示 -->
+    <footer class="text-center py-4 text-xs text-slate-400">
+        适合小学一年级 · 快乐数学随心练
+    </footer>
+
+    <script>
+        // --- 声音合成 (无需外部资源) ---
+        let soundEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    // 正确提示音 (两声高音)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'wrong') {
+                    // 错误提示音 (低音)
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(174.61, now + 0.15); // F3
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'win') {
+                    // 通关胜利音乐
+                    const notes = [400, 500, 600, 800];
+                    notes.forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.frequency.value = freq;
+                        g.gain.setValueAtTime(0.2, now + idx * 0.1);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.2);
+                        o.start(now + idx * 0.1);
+                        o.stop(now + idx * 0.1 + 0.2);
+                    });
+                }
+            } catch(e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundBtn').innerText = soundEnabled ? '🔊' : '🔇';
+        }
+
+        // --- 游戏状态变量 ---
+        let currentMode = 'add10';
+        let totalQuestions = 10;
+        let qIndex = 0;
+        let correctCount = 0;
+        let lives = 3;
+        let stars = parseInt(localStorage.getItem('math_stars') || '0');
+        let currentQuestion = {};
+        const fruits = ['🍎', '🍌', '🍓', '🍊', '🍇', '🎈', '⭐️'];
+
+        // 初始化
+        document.getElementById('starCount').innerText = stars;
+
+        function updateStars(amount) {
+            stars += amount;
+            localStorage.setItem('math_stars', stars);
+            document.getElementById('starCount').innerText = stars;
+        }
+
+        // 显示/切换视图
+        function showMenu() {
+            document.getElementById('menuView').classList.remove('hidden');
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('resultView').classList.add('hidden');
+        }
+
+        function startGame(mode) {
+            currentMode = mode;
+            qIndex = 0;
+            correctCount = 0;
+            lives = 3;
+            
+            document.getElementById('menuView').classList.add('hidden');
+            document.getElementById('resultView').classList.add('hidden');
+            document.getElementById('gameView').classList.remove('hidden');
+            
+            nextQuestion();
+        }
+
+        function restartGame() {
+            startGame(currentMode);
+        }
+
+        // 生成题目
+        function generateQuestion() {
+            let num1, num2, op, ans, text, displayAid = true;
+            let icon = fruits[Math.floor(Math.random() * fruits.length)];
+
+            if (currentMode === 'add10') {
+                // 10以内加法
+                ans = Math.floor(Math.random() * 9) + 2; // 2~10
+                num1 = Math.floor(Math.random() * (ans - 1)) + 1;
+                num2 = ans - num1;
+                op = '+';
+                text = `${num1} + ${num2} = ?`;
+            } else if (currentMode === 'sub10') {
+                // 10以内减法
+                num1 = Math.floor(Math.random() * 9) + 2; // 2~10
+                num2 = Math.floor(Math.random() * num1) + 1;
+                ans = num1 - num2;
+                op = '-';
+                text = `${num1} - ${num2} = ?`;
+            } else if (currentMode === 'mix20') {
+                // 20以内不进退位加减法
+                displayAid = false; // 20以内不显示过多图案，保持界面整洁
+                const isAdd = Math.random() > 0.5;
+                if (isAdd) {
+                    num1 = Math.floor(Math.random() * 10) + 10; // 10~19
+                    num2 = Math.floor(Math.random() * (20 - num1));
+                    ans = num1 + num2;
+                    text = `${num1} + ${num2} = ?`;
+                } else {
+                    num1 = Math.floor(Math.random() * 10) + 10; // 10~19
+                    num2 = Math.floor(Math.random() * (num1 - 10)) + 1;
+                    ans = num1 - num2;
+                    text = `${num1} - ${num2} = ?`;
+                }
+            } else if (currentMode === 'fillIn') {
+                // 填空题：如 4 + ? = 9 或 ? - 3 = 5
+                displayAid = false;
+                const isAdd = Math.random() > 0.5;
+                if (isAdd) {
+                    ans = Math.floor(Math.random() * 5) + 1;
+                    num1 = Math.floor(Math.random() * 5) + 1;
+                    let total = num1 + ans;
+                    text = `${num1} + ( ? ) = ${total}`;
+                } else {
+                    ans = Math.floor(Math.random() * 5) + 5; // 5~9
+                    num2 = Math.floor(Math.random() * 4) + 1;
+                    let total = ans - num2;
+                    text = `${ans} - ( ? ) = ${total}`;
+                    ans = num2; // 正确填空值
+                }
+            }
+
+            // 生成4个候选答案 (包含1个正确答案，3个干扰项)
+            let options = new Set([ans]);
+            while (options.size < 4) {
+                let offset = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
+                let fake = ans + offset;
+                if (fake >= 0 && fake <= 20) {
+                    options.add(fake);
+                }
+            }
+
+            return {
+                text: text,
+                ans: ans,
+                options: Array.from(options).sort(() => Math.random() - 0.5),
+                num1: num1,
+                num2: num2,
+                op: op,
+                icon: icon,
+                displayAid: displayAid
+            };
+        }
+
+        // 渲染辅助图案 (如 🍎🍎 + 🍎🍎🍎)
+        function renderVisualAid(q) {
+            const container = document.getElementById('visualAid');
+            container.innerHTML = '';
+
+            if (!q.displayAid) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            if (q.op === '+') {
+                // 加法：左边num1个 + 右边num2个
+                for (let i = 0; i < q.num1; i++) {
+                    container.innerHTML += `<span class="text-2xl pop-in">${q.icon}</span>`;
+                }
+                container.innerHTML += `<span class="text-xl font-bold mx-2 text-amber-500 self-center">+</span>`;
+                for (let i = 0; i < q.num2; i++) {
+                    container.innerHTML += `<span class="text-2xl pop-in">${q.icon}</span>`;
+                }
+            } else if (q.op === '-') {
+                // 减法：共num1个，其中num2个有划线/灰化
+                for (let i = 0; i < q.num1 - q.num2; i++) {
+                    container.innerHTML += `<span class="text-2xl pop-in">${q.icon}</span>`;
+                }
+                for (let i = 0; i < q.num2; i++) {
+                    container.innerHTML += `<span class="text-2xl opacity-30 grayscale relative">
+                        ${q.icon}
+                        <span class="absolute inset-0 text-red-500 font-bold flex items-center justify-center text-sm">❌</span>
+                    </span>`;
+                }
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (qIndex >= totalQuestions || lives <= 0) {
+                finishGame();
+                return;
+            }
+
+            qIndex++;
+            currentQuestion = generateQuestion();
+
+            // 更新 UI 状态
+            document.getElementById('currentQNum').innerText = qIndex;
+            document.getElementById('progressBar').style.width = `${((qIndex - 1) / totalQuestions) * 100}%`;
+            document.getElementById('livesCount').innerText = '❤️'.repeat(lives) || '💔';
+            
+            // 算式卡片
+            const qCard = document.getElementById('questionCard');
+            qCard.classList.remove('pop-in');
+            void qCard.offsetWidth; // 触发重绘
+            qCard.classList.add('pop-in');
+
+            document.getElementById('questionText').innerText = currentQuestion.text;
+            renderVisualAid(currentQuestion);
+
+            // 渲染备选按钮
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            const colors = [
+                'bg-rose-400 hover:bg-rose-500 border-rose-600',
+                'bg-sky-400 hover:bg-sky-500 border-sky-600',
+                'bg-emerald-400 hover:bg-emerald-500 border-emerald-600',
+                'bg-amber-400 hover:bg-amber-500 border-amber-600'
+            ];
+
+            currentQuestion.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `btn-press ${colors[idx % colors.length]} text-white border-b-8 rounded-2xl py-6 text-4xl font-bold custom-shadow flex justify-center items-center`;
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('hintBox').innerText = '选择一个你认为正确的数字！';
+            document.getElementById('hintBox').className = "text-center h-8 text-slate-500 font-bold text-lg";
+        }
+
+        // 检查答案
+        function checkAnswer(selectedOpt, btnElement) {
+            const card = document.getElementById('questionCard');
+            
+            if (selectedOpt === currentQuestion.ans) {
+                // 答对
+                playSound('correct');
+                correctCount++;
+                btnElement.classList.add('bg-emerald-500');
+                
+                document.getElementById('hintBox').innerText = '🎉 答对啦！太棒了！';
+                document.getElementById('hintBox').className = "text-center h-8 text-emerald-600 font-bold text-lg pop-in";
+
+                setTimeout(() => {
+                    nextQuestion();
+                }, 800);
+            } else {
+                // 答错
+                playSound('wrong');
+                lives--;
+                btnElement.disabled = true;
+                btnElement.classList.add('opacity-40', 'grayscale');
+
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
+
+                document.getElementById('livesCount').innerText = '❤️'.repeat(lives) || '💔';
+
+                if (lives <= 0) {
+                    document.getElementById('hintBox').innerText = '😅 没关系，继续加油！';
+                    setTimeout(() => finishGame(), 1000);
+                } else {
+                    document.getElementById('hintBox').innerText = `❌ 再想想看，还剩 ${lives} 次机会`;
+                    document.getElementById('hintBox').className = "text-center h-8 text-rose-500 font-bold text-lg";
+                }
+            }
+        }
+
+        // 游戏结束结算
+        function finishGame() {
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('resultView').classList.remove('hidden');
+
+            const accuracy = Math.round((correctCount / totalQuestions) * 100);
+            document.getElementById('accuracyText').innerText = `${accuracy}%`;
+
+            let earned = 0;
+            if (accuracy === 100) {
+                earned = 10;
+                playSound('win');
+                document.getElementById('resultEmoji').innerText = '🏆';
+                document.getElementById('resultTitle').innerText = '算术小天才！';
+                document.getElementById('resultDesc').innerText = '真厉害，十道题全部做对啦！';
+            } else if (accuracy >= 60) {
+                earned = 5;
+                playSound('win');
+                document.getElementById('resultEmoji').innerText = '🌟';
+                document.getElementById('resultTitle').innerText = '表现得很棒！';
+                document.getElementById('resultDesc').innerText = '继续保持，你越来越熟练了！';
+            } else {
+                earned = 2;
+                document.getElementById('resultEmoji').innerText = '💪';
+                document.getElementById('resultTitle').innerText = '加油，再接再厉！';
+                document.getElementById('resultDesc').innerText = '多练习几遍，下次一定能拿满分！';
+            }
+
+            document.getElementById('earnedStars').innerText = `⭐ +${earned}`;
+            updateStars(earned);
+        }
+    </script>
+</body>
+</html>
